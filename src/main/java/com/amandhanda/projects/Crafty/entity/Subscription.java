@@ -28,7 +28,7 @@ public class Subscription {
 
     Instant currentPeriodStart;
     Instant currentPeriodEnd;
-    // Boolean cancelAtPeriodEnd = false;
+    Boolean cancelAtPeriodEnd = false;
     
     Instant createdAt;
     Instant updatedAt;
