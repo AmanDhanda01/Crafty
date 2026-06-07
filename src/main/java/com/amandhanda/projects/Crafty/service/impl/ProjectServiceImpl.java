@@ -1,5 +1,6 @@
 package com.amandhanda.projects.Crafty.service.impl;
 
+import java.time.Instant;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -39,7 +40,6 @@ public class ProjectServiceImpl implements ProjectService {
 
     }
 
-
     @Override
     public List<ProjectSummaryResponse> getUserProjects(Long userId) {
         List<Project> projects = projectRespository.findAllAccessibleByUser(userId);
@@ -48,21 +48,37 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectResponse getUserProjectById(Long id, Long userId) {
-        // TODO Auto-generated method stub
-      return null;
+      Project project = getAccessibleProjectById(id, userId);
+      return projectMapper.toProjectResponse(project);
     }
 
 
     @Override
     public ProjectResponse updateProject(Long id, ProjectRequest request, Long userId) {
-        // TODO Auto-generated method stub
-        return null;
+         Project project = getAccessibleProjectById(id, userId);
+
+        if(!project.getOwner().getId().equals(userId)){
+            throw new RuntimeException("Only the owner can delete the project");
+        }
+
+         project.setName(request.name());
+         project = projectRespository.save(project);
+         return projectMapper.toProjectResponse(project);
     }
 
     @Override
     public void softDelete(Long id, Long userId) {
-        // TODO Auto-generated method stub
-        return;
+        Project project = getAccessibleProjectById(id, userId);
+        if(!project.getOwner().getId().equals(userId)){
+            throw new RuntimeException("Only the owner can delete the project");
+        }
+        project.setDeletedAt(Instant.now());
+        projectRespository.save(project);
+    }
+
+    // INTERNAL METHODS
+    private Project getAccessibleProjectById(Long id, Long userId) {
+        return projectRespository.findAccessibleProjectById(id, userId).orElseThrow();
     }
 
 }
