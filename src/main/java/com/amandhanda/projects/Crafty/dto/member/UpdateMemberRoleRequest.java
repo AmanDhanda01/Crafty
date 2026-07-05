@@ -2,5 +2,7 @@ package com.amandhanda.projects.Crafty.dto.member;
 
 import com.amandhanda.projects.Crafty.enums.ProjectRole;
 
-public record UpdateMemberRoleRequest(ProjectRole role) {
+import jakarta.validation.constraints.NotNull;
+
+public record UpdateMemberRoleRequest(@NotNull ProjectRole role) {
 }

@@ -11,6 +11,8 @@ import com.amandhanda.projects.Crafty.dto.project.ProjectResponse;
 import com.amandhanda.projects.Crafty.dto.project.ProjectSummaryResponse;
 import com.amandhanda.projects.Crafty.service.ProjectService;
 
+import jakarta.validation.Valid;
+
 import java.util.List;
 
 @RestController
@@ -33,14 +35,14 @@ public class ProjectController {
     }
 
     @PostMapping
-    public ResponseEntity<ProjectResponse> createProject(@RequestBody ProjectRequest request) {
+    public ResponseEntity<ProjectResponse> createProject(@RequestBody @Valid ProjectRequest request) {
         Long userId = 1L;
         System.out.println("Creating project for userId: " + userId + " with request: " + request);
         return ResponseEntity.status(HttpStatus.CREATED).body(projectService.createProject(request, userId));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<ProjectResponse> updateProject(@PathVariable Long id, @RequestBody ProjectRequest request) {
+    public ResponseEntity<ProjectResponse> updateProject(@PathVariable Long id, @RequestBody @Valid ProjectRequest request) {
         Long userId = 1L;
         return ResponseEntity.ok(projectService.updateProject(id, request, userId));
     }

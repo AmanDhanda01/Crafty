@@ -10,6 +10,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -28,7 +29,9 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "projects")
+@Table(name = "projects",indexes = {@Index(name = "idx_projects_updated_at_desc", columnList = "updated_at DESC,deleted_at"),
+     @Index(name = "idx_projects_deleted_at", columnList = "deleted_at")
+})
 public class Project {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,9 +40,6 @@ public class Project {
     @Column(nullable = false)
     String name;
     
-    @ManyToOne
-    @JoinColumn(name = "owner_id", nullable = false)
-    User owner;
 
     Boolean isPublic = false;
     

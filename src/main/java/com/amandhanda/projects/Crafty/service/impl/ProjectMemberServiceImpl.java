@@ -40,14 +40,9 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
 
         Project project = getAccessibleProjectById(projectId, userId);
 
-        List<MemberResponse> members = new ArrayList<>();
-
-        members.add(projectMemberMapper.toMemberResponseFromOwner(project.getOwner()));
-
-        members.addAll(projectMemberRepository.findByIdProjectId(projectId).stream()
-                .map(projectMemberMapper::toProjectMemberResponseFromMember).toList());
-
-        return members;
+        return projectMemberRepository.findByIdProjectId(projectId).stream()
+                .map(projectMemberMapper::toProjectMemberResponseFromMember).toList();
+     
     }
 
     @Override
@@ -55,11 +50,8 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
         
          Project project = getAccessibleProjectById(projectId, userId);
 
-         if(!project.getOwner().getId().equals(userId)) {
-            throw new RuntimeException("Only the owner can invite members");
-         }
 
-         User invitee = userRepository.findByEmail(request.email()).orElseThrow();
+         User invitee = userRepository.findByUsername(request.username()).orElseThrow();
 
          if(invitee.getId().equals(userId)) {
             throw new RuntimeException("You cannot invite yourself");
@@ -90,9 +82,6 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
             Long userId) {
         Project project = getAccessibleProjectById(projectId, userId);
 
-         if(!project.getOwner().getId().equals(userId)) {
-            throw new RuntimeException("Only the owner can update member roles");
-         }
 
          ProjectMemberId projectMemberId = new ProjectMemberId(memberId, projectId);
          ProjectMember projectMember = projectMemberRepository.findById(projectMemberId).orElseThrow();
@@ -105,9 +94,6 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     public void removeProjectMember(Long projectId, Long memberId, Long userId) {
          Project project = getAccessibleProjectById(projectId, userId);
 
-         if(!project.getOwner().getId().equals(userId)) {
-            throw new RuntimeException("Only the owner can delete member");
-         }
         ProjectMemberId projectMemberId = new ProjectMemberId(memberId, projectId);
 
         if(!projectMemberRepository.existsById(projectMemberId)) {
