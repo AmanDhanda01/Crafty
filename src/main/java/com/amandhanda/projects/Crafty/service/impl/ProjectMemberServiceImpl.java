@@ -17,6 +17,7 @@ import com.amandhanda.projects.Crafty.mapper.ProjectMemberMapper;
 import com.amandhanda.projects.Crafty.repository.ProjectMemberRepository;
 import com.amandhanda.projects.Crafty.repository.ProjectRespository;
 import com.amandhanda.projects.Crafty.repository.UserRepository;
+import com.amandhanda.projects.Crafty.security.AuthUtil;
 import com.amandhanda.projects.Crafty.service.ProjectMemberService;
 
 import jakarta.transaction.Transactional;
@@ -34,11 +35,12 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     ProjectRespository projectRespository;
     UserRepository userRepository;
     ProjectMemberMapper projectMemberMapper;
+    AuthUtil authUtil;
 
     @Override
-    public List<MemberResponse> getProjectMembers(Long projectId, Long userId) {
+    public List<MemberResponse> getProjectMembers(Long projectId) {
 
-        Project project = getAccessibleProjectById(projectId, userId);
+        Project project = getAccessibleProjectById(projectId);
 
         return projectMemberRepository.findByIdProjectId(projectId).stream()
                 .map(projectMemberMapper::toProjectMemberResponseFromMember).toList();
@@ -46,9 +48,10 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     }
 
     @Override
-    public MemberResponse inviteMember(Long projectId, InviteMemberRequest request, Long userId) {
+    public MemberResponse inviteMember(Long projectId, InviteMemberRequest request) {
         
-         Project project = getAccessibleProjectById(projectId, userId);
+         Long userId = authUtil.getCurrentUserId();
+         Project project = getAccessibleProjectById(projectId);
 
 
          User invitee = userRepository.findByUsername(request.username()).orElseThrow();
@@ -78,9 +81,8 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     }
 
     @Override
-    public MemberResponse updateMemberRole(Long projectId, Long memberId, UpdateMemberRoleRequest request,
-            Long userId) {
-        Project project = getAccessibleProjectById(projectId, userId);
+    public MemberResponse updateMemberRole(Long projectId, Long memberId, UpdateMemberRoleRequest request) {
+        Project project = getAccessibleProjectById(projectId);
 
 
          ProjectMemberId projectMemberId = new ProjectMemberId(memberId, projectId);
@@ -91,8 +93,8 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     }
 
     @Override
-    public void removeProjectMember(Long projectId, Long memberId, Long userId) {
-         Project project = getAccessibleProjectById(projectId, userId);
+    public void removeProjectMember(Long projectId, Long memberId) {
+         Project project = getAccessibleProjectById(projectId);
 
         ProjectMemberId projectMemberId = new ProjectMemberId(memberId, projectId);
 
@@ -104,7 +106,8 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
        
     }
 
-    private Project getAccessibleProjectById(Long id, Long userId) {
+    private Project getAccessibleProjectById(Long id) {
+        Long userId = authUtil.getCurrentUserId();
         return projectRespository.findAccessibleProjectById(id, userId).orElseThrow();
     }
 

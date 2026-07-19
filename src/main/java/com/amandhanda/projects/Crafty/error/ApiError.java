@@ -11,7 +11,7 @@ public record ApiError(HttpStatus status, String message,Instant timestamp, @Jso
       public ApiError(HttpStatus status, String message) {
         this(status, message, Instant.now(),null);
       }
-
+ 
       public ApiError(HttpStatus status, String message, List<ApiFieldError> fieldErrors) {
         this(status, message, Instant.now(), fieldErrors);
       }

@@ -12,13 +12,13 @@ import com.amandhanda.projects.Crafty.service.FileService;
 public class FileServiceImpl implements FileService {
 
     @Override
-    public List<FileNode> getFileTree(Long projectId, Long userId) {
+    public List<FileNode> getFileTree(Long projectId) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getFileTree'");
     }
 
     @Override
-    public FileContentResponse getFileContent(Long projectId, String path, Long userId) {
+    public FileContentResponse getFileContent(Long projectId, String path) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getFileContent'");
     }

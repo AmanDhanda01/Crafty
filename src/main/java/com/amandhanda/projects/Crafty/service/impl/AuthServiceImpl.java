@@ -1,5 +1,8 @@
 package com.amandhanda.projects.Crafty.service.impl;
 
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +13,7 @@ import com.amandhanda.projects.Crafty.entity.User;
 import com.amandhanda.projects.Crafty.error.BadRequestException;
 import com.amandhanda.projects.Crafty.mapper.UserMapper;
 import com.amandhanda.projects.Crafty.repository.UserRepository;
+import com.amandhanda.projects.Crafty.security.AuthUtil;
 import com.amandhanda.projects.Crafty.service.AuthService;
 
 import lombok.AccessLevel;
@@ -25,6 +29,8 @@ public class AuthServiceImpl implements AuthService {
     UserRepository userRepository;
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
+    AuthUtil authUtil;
+    AuthenticationManager authenticationManager;
 
     @Override
     public AuthResponse signup(SignUpRequest request) {
@@ -36,15 +42,23 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(request.password()));
         user = userRepository.save(user);
 
-        return new AuthResponse("dummy",userMapper.toUserProfileResponse(user));
+        String token = authUtil.generateAccessToken(user);
+
+        return new AuthResponse(token, userMapper.toUserProfileResponse(user));
 
 
     }
 
     @Override
     public AuthResponse login(LoginRequest request) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'login'");
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.username(), request.password())
+        );
+
+        User user = (User) authentication.getPrincipal();
+        String token = authUtil.generateAccessToken(user);
+
+        return new AuthResponse(token, userMapper.toUserProfileResponse(user));
     }
    
 }

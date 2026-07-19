@@ -10,13 +10,13 @@ import com.amandhanda.projects.Crafty.service.UsageService;
 public class UsageServiceImpl implements UsageService {
 
     @Override
-    public UsageTodayResponse getTodayUsageOfUser(Long userId) {
+    public UsageTodayResponse getTodayUsageOfUser() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getTodayUsageOfUser'");
     }
 
     @Override
-    public PlanLimitsResponse getCurrentSubscriptionLimitsOfUser(Long userId) {
+    public PlanLimitsResponse getCurrentSubscriptionLimitsOfUser() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getCurrentSubscriptionLimitsOfUser'");
     }

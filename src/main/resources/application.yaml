@@ -18,3 +18,5 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         jdbc:
           time_zone: Asia/Kolkata
+jwt:
+  secret-key: ksbkjskjbkfkeknlkjeflfjljbflkjbkshjkjsrkfjnksrnkjnfrkjnrskfnkjsrnknfjksn 

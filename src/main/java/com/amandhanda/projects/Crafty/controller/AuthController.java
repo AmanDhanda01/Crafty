@@ -37,8 +37,7 @@ public class AuthController {
     
     @GetMapping("/me")
     public ResponseEntity<UserProfileResponse> getProfile() {
-        long userId = 1L;
-        return ResponseEntity.ok(userService.getProfile(userId));
+        return ResponseEntity.ok(userService.getProfile());
     }
 
 }

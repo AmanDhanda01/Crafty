@@ -12,19 +12,19 @@ import com.amandhanda.projects.Crafty.service.SubscriptionService;
 public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
-    public SubscriptionResponse getCurrentSubscription(Long userId) {
+    public SubscriptionResponse getCurrentSubscription() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getCurrentSubscription'");
     }
 
     @Override
-    public CheckoutResponse createCheckoutSessionUrl(CheckoutRequest request, Long userId) {
+    public CheckoutResponse createCheckoutSessionUrl(CheckoutRequest request) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'createCheckoutSessionUrl'");
     }
 
     @Override
-    public PortalResponse openCustomerPortal(Long userId) {
+    public PortalResponse openCustomerPortal() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'openCustomerPortal'");
     }
