@@ -3,6 +3,7 @@ package com.amandhanda.projects.Crafty.service.impl;
 import java.time.Instant;
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.amandhanda.projects.Crafty.dto.project.ProjectRequest;
@@ -63,15 +64,17 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public ProjectResponse getUserProjectById(Long id) {
-      Project project = getAccessibleProjectById(id);
-      return projectMapper.toProjectResponse(project);
+    @PreAuthorize("@security.canViewProject(#projectId)")
+    public ProjectResponse getUserProjectById(Long projectId) {
+        Project project = getAccessibleProjectById(projectId);
+        return projectMapper.toProjectResponse(project);
     }
 
 
     @Override
-    public ProjectResponse updateProject(Long id, ProjectRequest request) {
-         Project project = getAccessibleProjectById(id);
+    @PreAuthorize("@security.canEditProject(#projectId)")
+    public ProjectResponse updateProject(Long projectId, ProjectRequest request) {
+         Project project = getAccessibleProjectById(projectId);
 
          project.setName(request.name());
          project = projectRespository.save(project);
@@ -79,8 +82,9 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public void softDelete(Long id) {
-        Project project = getAccessibleProjectById(id);
+    @PreAuthorize("@security.canDeleteProject(#projectId)")
+    public void softDelete(Long projectId) {
+        Project project = getAccessibleProjectById(projectId);
 
         project.setDeletedAt(Instant.now());
         projectRespository.save(project);

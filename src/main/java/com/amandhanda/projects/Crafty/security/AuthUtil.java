@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -19,13 +18,8 @@ import javax.crypto.SecretKey;
 @Component
 public class AuthUtil {
 
-    private final AuthenticationManager authenticationManager;
     @Value("${jwt.secret-key}")
     private String jwtSecretKey;
-
-    AuthUtil(AuthenticationManager authenticationManager) {
-        this.authenticationManager = authenticationManager;
-    }
 
     private SecretKey getSecretKey() {
         return Keys.hmacShaKeyFor(jwtSecretKey.getBytes());
