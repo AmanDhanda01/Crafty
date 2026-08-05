@@ -1,6 +1,8 @@
 spring:
   application:
     name: Crafty
+  config:
+    import: optional:file:./secrets.properties
 
   datasource:
     url: jdbc:postgresql://localhost:5432/craftydb?serverTimezone=Asia/Kolkata
@@ -19,4 +21,12 @@ spring:
         jdbc:
           time_zone: Asia/Kolkata
 jwt:
-  secret-key: ksbkjskjbkfkeknlkjeflfjljbflkjbkshjkjsrkfjnksrnkjnfrkjnrskfnkjsrnknfjksn 
+  secret-key: ${JWT_SECRET_KEY}
+
+stripe:
+  api:
+    secret: ${STRIPE_API_SECRET}
+  webhook:
+    secret: ${STRIPE_WEBHOOK_SECRET}
+
+client.url: http://localhost:8080

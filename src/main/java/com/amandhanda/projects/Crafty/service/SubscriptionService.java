@@ -10,7 +10,4 @@ import com.amandhanda.projects.Crafty.dto.subscription.SubscriptionResponse;
 public interface SubscriptionService {
     SubscriptionResponse getCurrentSubscription();
 
-    CheckoutResponse createCheckoutSessionUrl(CheckoutRequest request);
-
-    PortalResponse openCustomerPortal();
 }

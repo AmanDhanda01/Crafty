@@ -17,16 +17,5 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         throw new UnsupportedOperationException("Unimplemented method 'getCurrentSubscription'");
     }
 
-    @Override
-    public CheckoutResponse createCheckoutSessionUrl(CheckoutRequest request) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'createCheckoutSessionUrl'");
-    }
-
-    @Override
-    public PortalResponse openCustomerPortal() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'openCustomerPortal'");
-    }
 
 }

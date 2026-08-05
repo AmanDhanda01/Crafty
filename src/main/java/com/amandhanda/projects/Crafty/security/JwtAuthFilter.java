@@ -6,6 +6,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -20,10 +21,12 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtAuthFilter extends OncePerRequestFilter {
     
     private final AuthUtil authUtil;
+     private final HandlerExceptionResolver handlerExceptionResolver;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+        try{
         log.info("Request URI: {}", request.getRequestURI());
         
         final String requestHeaderToken = request.getHeader("Authorization");
@@ -43,6 +46,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    } catch (Exception e) {
+        handlerExceptionResolver.resolveException(request, response, null, e);
+    }
 
     }
 
