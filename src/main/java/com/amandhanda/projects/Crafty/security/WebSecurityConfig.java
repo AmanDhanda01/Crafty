@@ -1,5 +1,7 @@
 package com.amandhanda.projects.Crafty.security;
 
+import jakarta.servlet.DispatcherType;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,7 +27,15 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) {
         httpSecurity.csrf(csrfConfig -> csrfConfig.disable())
             .sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**","/webhooks/**").permitAll().anyRequest().authenticated() )
+            .authorizeHttpRequests(auth -> auth
+                .dispatcherTypeMatchers(
+        DispatcherType.ASYNC,
+        DispatcherType.ERROR
+    ).permitAll()
+
+                .requestMatchers("/api/auth/**", "/webhooks/**", "/error").permitAll()
+                .anyRequest().authenticated()
+            )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
             
         return httpSecurity.build();

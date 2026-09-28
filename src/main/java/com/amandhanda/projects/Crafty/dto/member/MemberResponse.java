@@ -11,7 +11,7 @@ public record MemberResponse(
         String username,
         String name,
         String avatarUrl,
-        ProjectRole projectRole,
+        ProjectRole role,
         Instant invitedAt
 ) {
 }

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.amandhanda.projects.Crafty.dto.project.FileContentResponse;
 import com.amandhanda.projects.Crafty.dto.project.FileNode;
-import com.amandhanda.projects.Crafty.service.FileService;
+import com.amandhanda.projects.Crafty.service.ProjectFileService;
 
 import java.util.List;
 
@@ -19,7 +19,7 @@ import java.util.List;
 @RequestMapping("/api/projects/{projectId}/files")
 public class FileController {
 
-    private final FileService fileService;
+    private final ProjectFileService fileService;
 
     @GetMapping
     public ResponseEntity<List<FileNode>> getFileTree(@PathVariable Long projectId) {

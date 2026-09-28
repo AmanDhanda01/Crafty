@@ -14,13 +14,15 @@ import com.amandhanda.projects.Crafty.entity.ProjectMember;
 import com.amandhanda.projects.Crafty.entity.ProjectMemberId;
 import com.amandhanda.projects.Crafty.entity.User;
 import com.amandhanda.projects.Crafty.enums.ProjectRole;
+import com.amandhanda.projects.Crafty.error.BadRequestException;
 import com.amandhanda.projects.Crafty.error.ResourceNotFoundException;
 import com.amandhanda.projects.Crafty.mapper.ProjectMapper;
 import com.amandhanda.projects.Crafty.repository.ProjectMemberRepository;
-import com.amandhanda.projects.Crafty.repository.ProjectRespository;
+import com.amandhanda.projects.Crafty.repository.ProjectRepository;
 import com.amandhanda.projects.Crafty.repository.UserRepository;
 import com.amandhanda.projects.Crafty.security.AuthUtil;
 import com.amandhanda.projects.Crafty.service.ProjectService;
+import com.amandhanda.projects.Crafty.service.SubscriptionService;
 
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
@@ -34,14 +36,18 @@ import lombok.experimental.FieldDefaults;
 public class ProjectServiceImpl implements ProjectService {
 
 
-    ProjectRespository projectRespository;
+    ProjectRepository projectRespository;
     UserRepository userRepository;
     ProjectMapper projectMapper;
     ProjectMemberRepository projectMemberRepository;
     AuthUtil authUtil;
+    SubscriptionService subscriptionService;
 
     @Override
     public ProjectResponse createProject(ProjectRequest request) {
+        if(!subscriptionService.canCreateNewProject()) {
+            throw new BadRequestException("User cannot create a New project with current Plan, Upgrade plan now.");
+        }
         Long userId = authUtil.getCurrentUserId();
         // User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", userId.toString()));
 

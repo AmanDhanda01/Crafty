@@ -15,7 +15,7 @@ import com.amandhanda.projects.Crafty.entity.ProjectMemberId;
 import com.amandhanda.projects.Crafty.entity.User;
 import com.amandhanda.projects.Crafty.mapper.ProjectMemberMapper;
 import com.amandhanda.projects.Crafty.repository.ProjectMemberRepository;
-import com.amandhanda.projects.Crafty.repository.ProjectRespository;
+import com.amandhanda.projects.Crafty.repository.ProjectRepository;
 import com.amandhanda.projects.Crafty.repository.UserRepository;
 import com.amandhanda.projects.Crafty.security.AuthUtil;
 import com.amandhanda.projects.Crafty.service.ProjectMemberService;
@@ -32,7 +32,7 @@ import lombok.experimental.FieldDefaults;
 public class ProjectMemberServiceImpl implements ProjectMemberService {
 
     ProjectMemberRepository projectMemberRepository;
-    ProjectRespository projectRespository;
+    ProjectRepository projectRespository;
     UserRepository userRepository;
     ProjectMemberMapper projectMemberMapper;
     AuthUtil authUtil;

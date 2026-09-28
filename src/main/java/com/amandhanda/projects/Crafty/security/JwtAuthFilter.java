@@ -47,9 +47,32 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     } catch (Exception e) {
-        handlerExceptionResolver.resolveException(request, response, null, e);
+        log.error("JWT filter error", e);
+
+            if (!response.isCommitted()) {
+                handlerExceptionResolver.resolveException(
+                        request,
+                        response,
+                        null,
+                        e
+                );
+            } else {
+                log.warn(
+                    "Response already committed; skipping exception resolver"
+                );
+            }
     }
 
+    }
+
+    @Override
+    protected boolean shouldNotFilterAsyncDispatch() {
+        return false;
+    }
+
+    @Override
+    protected boolean shouldNotFilterErrorDispatch() {
+        return false;
     }
 
 }
