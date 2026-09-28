@@ -1,4 +1,4 @@
-package com.codingshuttle.projects.Crafty.config;
+package com.amandhanda.projects.Crafty.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
