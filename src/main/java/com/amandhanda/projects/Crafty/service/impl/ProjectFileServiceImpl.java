@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.amandhanda.projects.Crafty.dto.project.FileContentResponse;
 import com.amandhanda.projects.Crafty.dto.project.FileNode;
+import com.amandhanda.projects.Crafty.dto.project.FileTreeResponse;
 import com.amandhanda.projects.Crafty.entity.Project;
 import com.amandhanda.projects.Crafty.entity.ProjectFile;
 import com.amandhanda.projects.Crafty.error.ResourceNotFoundException;
@@ -21,6 +22,7 @@ import com.amandhanda.projects.Crafty.service.ProjectFileService;
 import com.amandhanda.projects.Crafty.repository.ProjectRepository;
 
 import io.minio.MinioClient;
+import io.minio.GetObjectArgs;
 import io.minio.PutObjectArgs;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,17 +44,29 @@ public class ProjectFileServiceImpl implements ProjectFileService {
 
 
     @Override
-    public List<FileNode> getFileTree(Long projectId) {
+    public FileTreeResponse getFileTree(Long projectId) {
         List<ProjectFile> projectFileList = projectFileRepository.findByProjectId(projectId);
         List<FileNode> projectFileNodes = projectFileMapper.toListOfFileNode(projectFileList);
         // return new FileTreeResponse(projectFileNodes);
-        return projectFileNodes;
+        return new FileTreeResponse(projectFileNodes);
     }
 
     @Override
     public FileContentResponse getFileContent(Long projectId, String path) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getFileContent'");
+        String cleanPath = path.startsWith("/") ? path.substring(1) : path;
+        ProjectFile file = projectFileRepository.findByProjectIdAndPath(projectId, cleanPath)
+                .orElseThrow(() -> new ResourceNotFoundException("Project file", cleanPath));
+        String objectKey = file.getMinioObjectKey() != null
+                ? file.getMinioObjectKey()
+                : projectId + "/" + cleanPath;
+
+        try (InputStream inputStream = minioClient.getObject(
+                GetObjectArgs.builder().bucket(projectBucket).object(objectKey).build())) {
+            return new FileContentResponse(cleanPath, new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            log.error("Failed to read file {}/{}", projectId, cleanPath, e);
+            throw new RuntimeException("File read failed", e);
+        }
     }
 
     @Override

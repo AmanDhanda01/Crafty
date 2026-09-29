@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-// @Entity
+@Entity
 @Table(name = "chat_events")
 @Getter
 @Setter

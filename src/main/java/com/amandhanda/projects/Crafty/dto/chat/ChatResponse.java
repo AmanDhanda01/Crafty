@@ -14,6 +14,5 @@ public record ChatResponse(
         String content,
         Integer tokensUsed,
         Instant createdAt
-
 ) {
 }

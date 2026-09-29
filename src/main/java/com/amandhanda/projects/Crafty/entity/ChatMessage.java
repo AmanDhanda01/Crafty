@@ -12,7 +12,7 @@ import java.time.Instant;
 import java.util.List;
 
 
-// @Entity
+@Entity
 @Table(name = "chat_messages")
 @Getter
 @Setter
