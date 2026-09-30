@@ -23,6 +23,8 @@ import com.amandhanda.projects.Crafty.repository.ProjectRepository;
 
 import io.minio.MinioClient;
 import io.minio.GetObjectArgs;
+import io.minio.BucketExistsArgs;
+import io.minio.MakeBucketArgs;
 import io.minio.PutObjectArgs;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -79,6 +81,7 @@ public class ProjectFileServiceImpl implements ProjectFileService {
         String objectKey = projectId + "/" + cleanPath;
 
         try {
+            ensureProjectBucket();
             byte[] contentBytes = content.getBytes(StandardCharsets.UTF_8);
             InputStream inputStream = new ByteArrayInputStream(contentBytes);
             // saving the file content
@@ -117,6 +120,12 @@ public class ProjectFileServiceImpl implements ProjectFileService {
         if (path.endsWith(".css")) return "text/css";
 
         return "text/plain";
+    }
+
+    private void ensureProjectBucket() throws Exception {
+        if (!minioClient.bucketExists(BucketExistsArgs.builder().bucket(projectBucket).build())) {
+            minioClient.makeBucket(MakeBucketArgs.builder().bucket(projectBucket).build());
+        }
     }
        
 }

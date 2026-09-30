@@ -22,6 +22,7 @@ import com.amandhanda.projects.Crafty.repository.ProjectRepository;
 import com.amandhanda.projects.Crafty.repository.UserRepository;
 import com.amandhanda.projects.Crafty.security.AuthUtil;
 import com.amandhanda.projects.Crafty.service.ProjectService;
+import com.amandhanda.projects.Crafty.service.ProjectTemplateService;
 import com.amandhanda.projects.Crafty.service.SubscriptionService;
 
 import jakarta.transaction.Transactional;
@@ -42,6 +43,7 @@ public class ProjectServiceImpl implements ProjectService {
     ProjectMemberRepository projectMemberRepository;
     AuthUtil authUtil;
     SubscriptionService subscriptionService;
+    ProjectTemplateService projectTemplateService;
 
     @Override
     public ProjectResponse createProject(ProjectRequest request) {
@@ -59,21 +61,24 @@ public class ProjectServiceImpl implements ProjectService {
         ProjectMemberId projectMemberId = new ProjectMemberId(user.getId(),project.getId());
         ProjectMember projectMember = ProjectMember.builder().id(projectMemberId).project(project).user(user).role(ProjectRole.OWNER).acceptedAt(Instant.now()).invitedAt(Instant.now()).build();
         projectMemberRepository.save(projectMember);
+        projectTemplateService.initializeProjectFromTemplate(project.getId());
         return projectMapper.toProjectResponse(project);
 
     }
 
     @Override
     public List<ProjectSummaryResponse> getUserProjects() {
-        List<Project> projects = projectRespository.findAllAccessibleByUser(authUtil.getCurrentUserId());
-        return projectMapper.toProjectSummaryResponse(projects);
+        return projectRespository.findAllAccessibleByUser(authUtil.getCurrentUserId()).stream()
+            .map(project -> projectMapper.toProjectSummaryResponse(project.getProject(), project.getRole()))
+            .toList();
     }
 
     @Override
     @PreAuthorize("@security.canViewProject(#projectId)")
-    public ProjectResponse getUserProjectById(Long projectId) {
-        Project project = getAccessibleProjectById(projectId);
-        return projectMapper.toProjectResponse(project);
+    public ProjectSummaryResponse getUserProjectById(Long projectId) {
+        return projectRespository.findAccessibleProjectByIdWithRole(projectId, authUtil.getCurrentUserId())
+            .map(project -> projectMapper.toProjectSummaryResponse(project.getProject(), project.getRole()))
+                .orElseThrow(() -> new BadRequestException("Project Not Found"));
     }
 
 

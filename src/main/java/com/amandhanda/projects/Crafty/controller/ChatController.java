@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.amandhanda.projects.Crafty.dto.chat.ChatRequest;
 import com.amandhanda.projects.Crafty.dto.chat.ChatResponse;
+import com.amandhanda.projects.Crafty.dto.chat.StreamResponse;
 import com.amandhanda.projects.Crafty.service.AiGenerationService;
 import com.amandhanda.projects.Crafty.service.ChatService;
 
@@ -28,11 +29,11 @@ public class ChatController {
     private final ChatService chatService;
 
     @PostMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent<String>> streamChat(
+        public Flux<ServerSentEvent<StreamResponse>> streamChat(
             @RequestBody ChatRequest request) {
 
         return aiGenerationService.streamResponse(request.message(), request.projectId())
-                .map(data -> ServerSentEvent.<String>builder()
+            .map(data -> ServerSentEvent.<StreamResponse>builder()
                         .data(data)
                         .build());
     }

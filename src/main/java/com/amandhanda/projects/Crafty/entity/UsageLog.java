@@ -1,19 +1,43 @@
 package com.amandhanda.projects.Crafty.entity;
 
-import java.time.Instant;
+import java.time.LocalDate;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.FieldDefaults;
+
+@Entity
+@Table(name = "usage_logs", uniqueConstraints = @UniqueConstraint(columnNames = { "user_id", "date" }))
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class UsageLog {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    User user;
-    Project project;
 
-    String action;
+    @Column(name = "user_id", nullable = false)
+    Long userId;
 
-    Integer tokensUsed;
-    Integer durationMs;
+    @Column(nullable = false)
+    LocalDate date;
 
-    String metaData; // JSON of {model_used, prompt_used},
-
-    Instant createdAt;
+    @Column(nullable = false)
+    @Builder.Default
+    Integer tokensUsed = 0;
 }

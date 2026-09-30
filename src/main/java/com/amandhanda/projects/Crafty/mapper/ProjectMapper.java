@@ -10,10 +10,12 @@ import com.amandhanda.projects.Crafty.dto.project.ProjectResponse;
 import com.amandhanda.projects.Crafty.dto.project.ProjectSummaryResponse;
 import com.amandhanda.projects.Crafty.entity.Project;
 import com.amandhanda.projects.Crafty.entity.User;
+import com.amandhanda.projects.Crafty.enums.ProjectRole;
 
 @Mapper(componentModel = "spring")
 public interface ProjectMapper {
     ProjectResponse toProjectResponse(Project project);
-    List<ProjectSummaryResponse> toProjectSummaryResponse(List<Project> projects);
+    ProjectSummaryResponse toProjectSummaryResponse(Project project, ProjectRole role);
+    List<ProjectSummaryResponse> toListOfProjectSummaryResponse(List<Project> projects);
     UserProfileResponse map(User value);
 }
