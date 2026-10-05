@@ -1,11 +1,5 @@
 package com.amandhanda.projects.Crafty.service.impl;
 
-import java.time.Instant;
-import java.util.List;
-
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
 import com.amandhanda.projects.Crafty.dto.member.InviteMemberRequest;
 import com.amandhanda.projects.Crafty.dto.member.MemberResponse;
 import com.amandhanda.projects.Crafty.dto.member.UpdateMemberRoleRequest;
@@ -19,11 +13,15 @@ import com.amandhanda.projects.Crafty.repository.ProjectRepository;
 import com.amandhanda.projects.Crafty.repository.UserRepository;
 import com.amandhanda.projects.Crafty.security.AuthUtil;
 import com.amandhanda.projects.Crafty.service.ProjectMemberService;
-
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
+import java.time.Instant;
+import java.util.List;
 
 @Service
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
@@ -32,87 +30,84 @@ import lombok.experimental.FieldDefaults;
 public class ProjectMemberServiceImpl implements ProjectMemberService {
 
     ProjectMemberRepository projectMemberRepository;
-    ProjectRepository projectRespository;
-    UserRepository userRepository;
+    ProjectRepository projectRepository;
     ProjectMemberMapper projectMemberMapper;
+    UserRepository userRepository;
     AuthUtil authUtil;
 
     @Override
     @PreAuthorize("@security.canViewMembers(#projectId)")
     public List<MemberResponse> getProjectMembers(Long projectId) {
-
-        Project project = getAccessibleProjectById(projectId);
-
-        return projectMemberRepository.findByIdProjectId(projectId).stream()
-                .map(projectMemberMapper::toProjectMemberResponseFromMember).toList();
-     
+        return projectMemberRepository.findByIdProjectId(projectId)
+                .stream()
+                .map(projectMemberMapper::toProjectMemberResponseFromMember)
+                .toList();
     }
 
     @Override
     @PreAuthorize("@security.canManageMembers(#projectId)")
     public MemberResponse inviteMember(Long projectId, InviteMemberRequest request) {
-        
-         Long userId = authUtil.getCurrentUserId();
-         Project project = getAccessibleProjectById(projectId);
+        Long userId = authUtil.getCurrentUserId();
+        Project project = getAccessibleProjectById(projectId, userId);
 
+        User invitee = userRepository.findByUsername(request.username()).orElseThrow();
 
-         User invitee = userRepository.findByUsername(request.username()).orElseThrow();
+        if(invitee.getId().equals(userId)) {
+            throw new RuntimeException("Cannot invite yourself");
+        }
 
-         if(invitee.getId().equals(userId)) {
-            throw new RuntimeException("You cannot invite yourself");
-         }
+        ProjectMemberId projectMemberId = new ProjectMemberId(projectId, invitee.getId());
 
-         ProjectMemberId projectMemberId = new ProjectMemberId(invitee.getId(),projectId);
+        if(projectMemberRepository.existsById(projectMemberId)) {
+            throw new RuntimeException("Cannot invite once again");
+        }
 
-         if(projectMemberRepository.existsById(projectMemberId)) {
-             throw new RuntimeException("User is already a member of the project");
-         }
-        
-        ProjectMember projectMember = ProjectMember.builder()
+        ProjectMember member = ProjectMember.builder()
                 .id(projectMemberId)
                 .project(project)
                 .user(invitee)
-                .role(request.role())
+                .projectRole(request.role())
                 .invitedAt(Instant.now())
                 .build();
-        
-        projectMember = projectMemberRepository.save(projectMember);
 
-        return projectMemberMapper.toProjectMemberResponseFromMember(projectMember);
-        
+        projectMemberRepository.save(member);
+
+        return projectMemberMapper.toProjectMemberResponseFromMember(member);
     }
 
     @Override
     @PreAuthorize("@security.canManageMembers(#projectId)")
     public MemberResponse updateMemberRole(Long projectId, Long memberId, UpdateMemberRoleRequest request) {
-        Project project = getAccessibleProjectById(projectId);
+        Long userId = authUtil.getCurrentUserId();
+        Project project = getAccessibleProjectById(projectId, userId);
 
+        ProjectMemberId projectMemberId = new ProjectMemberId(projectId, memberId);
+        ProjectMember projectMember = projectMemberRepository.findById(projectMemberId).orElseThrow();
 
-         ProjectMemberId projectMemberId = new ProjectMemberId(memberId, projectId);
-         ProjectMember projectMember = projectMemberRepository.findById(projectMemberId).orElseThrow();
-         projectMember.setRole(request.role());
+        projectMember.setProjectRole(request.role());
 
-         return projectMemberMapper.toProjectMemberResponseFromMember(projectMemberRepository.save(projectMember));
+        projectMemberRepository.save(projectMember);
+
+        return projectMemberMapper.toProjectMemberResponseFromMember(projectMember);
     }
 
     @Override
     @PreAuthorize("@security.canManageMembers(#projectId)")
     public void removeProjectMember(Long projectId, Long memberId) {
-         Project project = getAccessibleProjectById(projectId);
-
-        ProjectMemberId projectMemberId = new ProjectMemberId(memberId, projectId);
-
-        if(!projectMemberRepository.existsById(projectMemberId)) {
-            throw new RuntimeException("User is not a member of the project");
-        }
-        
-        projectMemberRepository.deleteById(projectMemberId);
-       
-    }
-
-    private Project getAccessibleProjectById(Long id) {
         Long userId = authUtil.getCurrentUserId();
-        return projectRespository.findAccessibleProjectById(id, userId).orElseThrow();
+        Project project = getAccessibleProjectById(projectId, userId);
+
+        ProjectMemberId projectMemberId = new ProjectMemberId(projectId, memberId);
+        if(!projectMemberRepository.existsById(projectMemberId)) {
+            throw new RuntimeException("Member not found in project");
+        }
+
+        projectMemberRepository.deleteById(projectMemberId);
     }
 
+    ///  INTERNAL FUNCTIONS
+
+    public Project getAccessibleProjectById(Long projectId, Long userId) {
+        return projectRepository.findAccessibleProjectById(projectId, userId).orElseThrow();
+    }
 }

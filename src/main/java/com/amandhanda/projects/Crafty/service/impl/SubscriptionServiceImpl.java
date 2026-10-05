@@ -1,13 +1,5 @@
 package com.amandhanda.projects.Crafty.service.impl;
 
-import java.time.Instant;
-import java.util.Set;
-
-import org.springframework.stereotype.Service;
-
-import com.amandhanda.projects.Crafty.dto.subscription.CheckoutRequest;
-import com.amandhanda.projects.Crafty.dto.subscription.CheckoutResponse;
-import com.amandhanda.projects.Crafty.dto.subscription.PortalResponse;
 import com.amandhanda.projects.Crafty.dto.subscription.SubscriptionResponse;
 import com.amandhanda.projects.Crafty.entity.Plan;
 import com.amandhanda.projects.Crafty.entity.Subscription;
@@ -21,14 +13,17 @@ import com.amandhanda.projects.Crafty.repository.SubscriptionRepository;
 import com.amandhanda.projects.Crafty.repository.UserRepository;
 import com.amandhanda.projects.Crafty.security.AuthUtil;
 import com.amandhanda.projects.Crafty.service.SubscriptionService;
-
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.util.Set;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class SubscriptionServiceImpl implements SubscriptionService {
 
     private final AuthUtil authUtil;
@@ -38,7 +33,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final PlanRepository planRepository;
     private final ProjectMemberRepository projectMemberRepository;
 
-    private static final int FREE_TIER_PROJECTS_ALLOWED = 100;
+    private final Integer FREE_TIER_PROJECTS_ALLOWED = 100;
+
 
     @Override
     public SubscriptionResponse getCurrentSubscription() {
@@ -52,10 +48,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         );
 
         return subscriptionMapper.toSubscriptionResponse(currentSubscription);
-        
     }
 
-     @Override
+    @Override
     public void activateSubscription(Long userId, Long planId, String subscriptionId, String customerId) {
 
         boolean exists = subscriptionRepository.existsByStripeSubscriptionId(subscriptionId);
@@ -182,7 +177,5 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         return subscriptionRepository.findByStripeSubscriptionId(gatewaySubscriptionId).orElseThrow(() ->
                 new ResourceNotFoundException("Subscription", gatewaySubscriptionId));
     }
-
-
 
 }

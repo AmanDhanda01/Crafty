@@ -1,17 +1,14 @@
 package com.amandhanda.projects.Crafty.controller;
 
-
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import com.amandhanda.projects.Crafty.dto.member.InviteMemberRequest;
 import com.amandhanda.projects.Crafty.dto.member.MemberResponse;
 import com.amandhanda.projects.Crafty.dto.member.UpdateMemberRoleRequest;
 import com.amandhanda.projects.Crafty.service.ProjectMemberService;
-
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -54,6 +51,5 @@ public class ProjectMemberController {
         projectMemberService.removeProjectMember(projectId, memberId);
         return ResponseEntity.noContent().build();
     }
-
 
 }

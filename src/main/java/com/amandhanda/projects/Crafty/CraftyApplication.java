@@ -12,4 +12,5 @@ public class CraftyApplication {
 		TimeZone.setDefault(TimeZone.getTimeZone("Asia/Kolkata"));
 		SpringApplication.run(CraftyApplication.class, args);
 	}
-} 
+
+}

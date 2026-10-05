@@ -1,4 +1,7 @@
 HELP.md
+.DS_Store
+dump/
+secrets.properties
 target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
@@ -31,5 +34,3 @@ build/
 
 ### VS Code ###
 .vscode/
-dump/
-secrets.properties

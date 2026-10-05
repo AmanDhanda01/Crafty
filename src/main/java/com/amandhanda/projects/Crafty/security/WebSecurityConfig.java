@@ -1,8 +1,7 @@
 package com.amandhanda.projects.Crafty.security;
 
 import jakarta.servlet.DispatcherType;
-
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,8 +16,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
-import lombok.RequiredArgsConstructor;
-
 @Configuration
 @RequiredArgsConstructor
 @EnableMethodSecurity
@@ -26,26 +23,25 @@ public class WebSecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
     private final HandlerExceptionResolver handlerExceptionResolver;
-    
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) {
-        httpSecurity.csrf(csrfConfig -> csrfConfig.disable())
-            .cors(Customizer.withDefaults())
-            .sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .dispatcherTypeMatchers(
-        DispatcherType.ASYNC,
-        DispatcherType.ERROR
-    ).permitAll()
+        httpSecurity
+                .csrf(csrfConfig -> csrfConfig.disable())
+                .cors(Customizer.withDefaults())
+                .sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll()
+                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
+                        .requestMatchers("/api/auth/**", "/webhooks/**").permitAll()
+                        .anyRequest().authenticated()
+                )
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(exceptionHandlingConfigurer ->
+                        exceptionHandlingConfigurer.accessDeniedHandler((request, response, accessDeniedException) -> {
+                            handlerExceptionResolver.resolveException(request, response, null, accessDeniedException);
+                        }));
 
-                .requestMatchers("/api/auth/**", "/webhooks/**", "/error").permitAll()
-                .anyRequest().authenticated()
-            )
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-            .exceptionHandling(exceptionHandling -> exceptionHandling
-                .accessDeniedHandler((request, response, exception) ->
-                    handlerExceptionResolver.resolveException(request, response, null, exception)));
-            
         return httpSecurity.build();
     }
 
@@ -54,9 +50,8 @@ public class WebSecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean 
-    public AuthenticationManager  authenticationManager(AuthenticationConfiguration authConfig){
-        return authConfig.getAuthenticationManager();
-    } 
-
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
 }

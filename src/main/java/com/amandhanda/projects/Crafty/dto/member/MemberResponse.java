@@ -1,16 +1,13 @@
 package com.amandhanda.projects.Crafty.dto.member;
 
-
+import com.amandhanda.projects.Crafty.enums.ProjectRole;
 
 import java.time.Instant;
-
-import com.amandhanda.projects.Crafty.enums.ProjectRole;
 
 public record MemberResponse(
         Long userId,
         String username,
         String name,
-        String avatarUrl,
         ProjectRole role,
         Instant invitedAt
 ) {

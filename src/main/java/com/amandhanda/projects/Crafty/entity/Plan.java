@@ -1,10 +1,6 @@
 package com.amandhanda.projects.Crafty.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,22 +9,22 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Entity(name = "plan")
+@Entity
 public class Plan {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
+
     String name;
-    
+
     @Column(unique = true)
     String stripePriceId;
 
     Integer maxProjects;
     Integer maxTokensPerDay;
-    Integer maxPreviews; // maximum number of preview generations allowed
+    Integer maxPreviews; //max number of previews allowed per plan
+    Boolean unlimitedAi; //unlimited access to LLM, ignore maxTokensPerDay if true
 
-    Boolean unlimitedAi; //unlimited access to AI ignore maxTokensPerDay if true
-
-    Boolean isActive;
+    Boolean active;
 }

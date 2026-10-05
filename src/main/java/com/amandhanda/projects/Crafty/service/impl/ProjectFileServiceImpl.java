@@ -1,15 +1,5 @@
 package com.amandhanda.projects.Crafty.service.impl;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import com.amandhanda.projects.Crafty.dto.project.FileContentResponse;
 import com.amandhanda.projects.Crafty.dto.project.FileNode;
 import com.amandhanda.projects.Crafty.dto.project.FileTreeResponse;
@@ -18,16 +8,22 @@ import com.amandhanda.projects.Crafty.entity.ProjectFile;
 import com.amandhanda.projects.Crafty.error.ResourceNotFoundException;
 import com.amandhanda.projects.Crafty.mapper.ProjectFileMapper;
 import com.amandhanda.projects.Crafty.repository.ProjectFileRepository;
-import com.amandhanda.projects.Crafty.service.ProjectFileService;
 import com.amandhanda.projects.Crafty.repository.ProjectRepository;
-
-import io.minio.MinioClient;
+import com.amandhanda.projects.Crafty.service.ProjectFileService;
 import io.minio.GetObjectArgs;
-import io.minio.BucketExistsArgs;
-import io.minio.MakeBucketArgs;
+import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -49,31 +45,30 @@ public class ProjectFileServiceImpl implements ProjectFileService {
     public FileTreeResponse getFileTree(Long projectId) {
         List<ProjectFile> projectFileList = projectFileRepository.findByProjectId(projectId);
         List<FileNode> projectFileNodes = projectFileMapper.toListOfFileNode(projectFileList);
-        // return new FileTreeResponse(projectFileNodes);
         return new FileTreeResponse(projectFileNodes);
     }
 
     @Override
     public FileContentResponse getFileContent(Long projectId, String path) {
-        String cleanPath = path.startsWith("/") ? path.substring(1) : path;
-        ProjectFile file = projectFileRepository.findByProjectIdAndPath(projectId, cleanPath)
-                .orElseThrow(() -> new ResourceNotFoundException("Project file", cleanPath));
-        String objectKey = file.getMinioObjectKey() != null
-                ? file.getMinioObjectKey()
-                : projectId + "/" + cleanPath;
+        String objectName = projectId + "/" + path;
+        try (
+                InputStream is = minioClient.getObject(
+                        GetObjectArgs.builder()
+                                .bucket(BUCKET_NAME)
+                                .object(objectName)
+                                .build())) {
 
-        try (InputStream inputStream = minioClient.getObject(
-                GetObjectArgs.builder().bucket(projectBucket).object(objectKey).build())) {
-            return new FileContentResponse(cleanPath, new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
+            String content = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+            return new FileContentResponse(path, content);
         } catch (Exception e) {
-            log.error("Failed to read file {}/{}", projectId, cleanPath, e);
-            throw new RuntimeException("File read failed", e);
+            log.error("Failed to read file: {}/{}", projectId, path, e);
+            throw new RuntimeException("Failed to read file content", e);
         }
     }
 
     @Override
     public void saveFile(Long projectId, String path, String content) {
-         Project project = projectRepository.findById(projectId).orElseThrow(
+        Project project = projectRepository.findById(projectId).orElseThrow(
                 () -> new ResourceNotFoundException("Project", projectId.toString())
         );
 
@@ -81,7 +76,6 @@ public class ProjectFileServiceImpl implements ProjectFileService {
         String objectKey = projectId + "/" + cleanPath;
 
         try {
-            ensureProjectBucket();
             byte[] contentBytes = content.getBytes(StandardCharsets.UTF_8);
             InputStream inputStream = new ByteArrayInputStream(contentBytes);
             // saving the file content
@@ -121,11 +115,4 @@ public class ProjectFileServiceImpl implements ProjectFileService {
 
         return "text/plain";
     }
-
-    private void ensureProjectBucket() throws Exception {
-        if (!minioClient.bucketExists(BucketExistsArgs.builder().bucket(projectBucket).build())) {
-            minioClient.makeBucket(MakeBucketArgs.builder().bucket(projectBucket).build());
-        }
-    }
-       
 }

@@ -21,15 +21,21 @@ spring:
         jdbc:
           time_zone: Asia/Kolkata
   ai:
-    openai:
-      api-key: ${OPEN_AI_API_KEY}
-      base-url: https://openrouter.ai/api
+#     openai:
+#       api-key: ${OPEN_AI_API_KEY}
+#       base-url: https://openrouter.ai/api
+#       chat:
+#         options:
+# #          model: x-ai/grok-code-fast-1
+#           model: openai/gpt-5.6-sol
+#           # model: openrouter/free
+#           temperature: 0.3
+    ollama:
+      base-url: http://localhost:11434
       chat:
         options:
-#          model: x-ai/grok-code-fast-1
-          # model: google/gemini-3-flash-preview
-          model: openrouter/free
-          temperature: 0.3
+          model: qwen3:8b
+          temperature: 0.2
 jwt:
   secret-key: ${JWT_SECRET_KEY}
 

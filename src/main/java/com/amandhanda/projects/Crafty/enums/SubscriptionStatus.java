@@ -1,5 +1,5 @@
 package com.amandhanda.projects.Crafty.enums;
 
 public enum SubscriptionStatus {
-    ACTIVE,CANCELED,PAST_DUE,INCOMPLETE,TRIALING
+    ACTIVE, TRIALING, CANCELED, PAST_DUE, INCOMPLETE
 }

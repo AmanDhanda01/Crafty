@@ -1,18 +1,11 @@
 package com.amandhanda.projects.Crafty.repository;
 
-import java.util.List;
-import java.util.Optional;
-
+import aj.org.objectweb.asm.commons.Remapper;
+import com.amandhanda.projects.Crafty.entity.Plan;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.amandhanda.projects.Crafty.entity.Plan;
+import java.util.Optional;
 
 public interface PlanRepository extends JpaRepository<Plan, Long> {
-   
-    Optional<Plan> findById(Long id);
-
     Optional<Plan> findByStripePriceId(String id);
-
-    List<Plan> findByIsActiveTrueOrderByIdAsc();
-    
-} 
+}

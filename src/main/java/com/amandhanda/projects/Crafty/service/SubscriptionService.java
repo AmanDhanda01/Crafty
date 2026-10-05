@@ -1,14 +1,9 @@
 package com.amandhanda.projects.Crafty.service;
 
-
-
-import java.time.Instant;
-
-import com.amandhanda.projects.Crafty.dto.subscription.CheckoutRequest;
-import com.amandhanda.projects.Crafty.dto.subscription.CheckoutResponse;
-import com.amandhanda.projects.Crafty.dto.subscription.PortalResponse;
 import com.amandhanda.projects.Crafty.dto.subscription.SubscriptionResponse;
 import com.amandhanda.projects.Crafty.enums.SubscriptionStatus;
+
+import java.time.Instant;
 
 public interface SubscriptionService {
     SubscriptionResponse getCurrentSubscription();
@@ -24,5 +19,4 @@ public interface SubscriptionService {
     void markSubscriptionPastDue(String subId);
 
     boolean canCreateNewProject();
-
 }

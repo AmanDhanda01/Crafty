@@ -1,30 +1,23 @@
 package com.amandhanda.projects.Crafty.service.impl;
 
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import com.amandhanda.projects.Crafty.entity.Project;
 import com.amandhanda.projects.Crafty.entity.ProjectFile;
 import com.amandhanda.projects.Crafty.error.ResourceNotFoundException;
 import com.amandhanda.projects.Crafty.repository.ProjectFileRepository;
 import com.amandhanda.projects.Crafty.repository.ProjectRepository;
 import com.amandhanda.projects.Crafty.service.ProjectTemplateService;
-
-import io.minio.CopyObjectArgs;
-import io.minio.CopySource;
-import io.minio.ListObjectsArgs;
-import io.minio.MinioClient;
-import io.minio.Result;
+import io.minio.*;
 import io.minio.messages.Item;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
-@Service
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+
 @RequiredArgsConstructor
+@Service
 @Slf4j
 public class ProjectTemplateServiceImpl implements ProjectTemplateService {
 
@@ -32,67 +25,84 @@ public class ProjectTemplateServiceImpl implements ProjectTemplateService {
     private final ProjectFileRepository projectFileRepository;
     private final ProjectRepository projectRepository;
 
-    @Value("${minio.template-bucket:starter-projects}")
-    private String templateBucket;
+    private static final String TEMPLATE_BUCKET = "starter-projects";
+    private static final String TARGET_BUCKET = "projects";
+    private static final String TEMPLATE_NAME = "react-vite-tailwind-daisyui-starter";
 
-    @Value("${minio.project-bucket:projects}")
-    private String projectBucket;
-
-    @Value("${minio.template-name:react-vite-tailwind-daisyui-starter}")
-    private String templateName;
 
     @Override
     public void initializeProjectFromTemplate(Long projectId) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project", projectId.toString()));
+        Project project = projectRepository.findById(projectId).orElseThrow(
+                () -> new ResourceNotFoundException("Project", projectId.toString()));
 
         try {
-            if (!minioClient.bucketExists(io.minio.BucketExistsArgs.builder().bucket(templateBucket).build())) {
-                log.info("Starter template bucket '{}' is not provisioned; creating project without template files", templateBucket);
-                return;
-            }
+            Iterable<Result<Item>> results = minioClient.listObjects(
+                    ListObjectsArgs.builder()
+                            .bucket(TEMPLATE_BUCKET)
+                            .prefix(TEMPLATE_NAME + "/")
+                            .recursive(true)
+                            .build()
+            );
 
-            if (!minioClient.bucketExists(io.minio.BucketExistsArgs.builder().bucket(projectBucket).build())) {
-                minioClient.makeBucket(io.minio.MakeBucketArgs.builder().bucket(projectBucket).build());
-            }
+            List<ProjectFile> filesToSave = new ArrayList<>(); // for metadata in postgres db
 
-            Iterable<Result<Item>> objects = minioClient.listObjects(ListObjectsArgs.builder()
-                    .bucket(templateBucket)
-                    .prefix(templateName + "/")
-                    .recursive(true)
-                    .build());
-
-            List<ProjectFile> files = new ArrayList<>();
-            for (Result<Item> objectResult : objects) {
-                Item item = objectResult.get();
-                if (item.isDir()) {
-                    continue;
-                }
-
+            for (Result<Item> result : results) {
+                Item item = result.get();
                 String sourceKey = item.objectName();
-                String cleanPath = sourceKey.substring((templateName + "/").length());
-                String destinationKey = projectId + "/" + cleanPath;
 
-                minioClient.copyObject(CopyObjectArgs.builder()
-                        .bucket(projectBucket)
-                        .object(destinationKey)
-                        .source(CopySource.builder().bucket(templateBucket).object(sourceKey).build())
-                        .build());
+                String cleanPath = sourceKey.replaceFirst(TEMPLATE_NAME + "/", "");
+                String destKey = projectId + "/" + cleanPath;
 
-                ProjectFile file = projectFileRepository.findByProjectIdAndPath(projectId, cleanPath)
-                        .orElseGet(() -> ProjectFile.builder()
-                                .project(project)
-                                .path(cleanPath)
-                                .createdAt(Instant.now())
-                                .build());
-                file.setMinioObjectKey(destinationKey);
-                file.setUpdatedAt(Instant.now());
-                files.add(file);
+                minioClient.copyObject(
+                        CopyObjectArgs.builder()
+                                .bucket(TARGET_BUCKET)
+                                .object(destKey)
+                                .source(
+                                        CopySource.builder()
+                                                .bucket(TEMPLATE_BUCKET)
+                                                .object(sourceKey)
+                                                .build()
+                                )
+                                .build()
+                );
+
+                ProjectFile pf = ProjectFile.builder()
+                        .project(project)
+                        .path(cleanPath)
+                        .minioObjectKey(destKey)
+                        .createdAt(Instant.now())
+                        .updatedAt(Instant.now())
+                        .build();
+
+                filesToSave.add(pf);
             }
 
-            projectFileRepository.saveAll(files);
-        } catch (Exception exception) {
-            throw new IllegalStateException("Failed to initialize project from starter template", exception);
+            projectFileRepository.saveAll(filesToSave);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to initialize project from template", e);
         }
+
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

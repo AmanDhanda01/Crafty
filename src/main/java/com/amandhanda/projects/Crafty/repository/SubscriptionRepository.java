@@ -1,10 +1,8 @@
 package com.amandhanda.projects.Crafty.repository;
 
-
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import com.amandhanda.projects.Crafty.entity.Subscription;
 import com.amandhanda.projects.Crafty.enums.SubscriptionStatus;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 import java.util.Set;
@@ -20,4 +18,3 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
 
     Optional<Subscription> findByStripeSubscriptionId(String gatewaySubscriptionId);
 }
-

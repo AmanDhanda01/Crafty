@@ -1,11 +1,5 @@
 package com.amandhanda.projects.Crafty.service.impl;
 
-import java.time.Instant;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import com.amandhanda.projects.Crafty.dto.subscription.CheckoutRequest;
 import com.amandhanda.projects.Crafty.dto.subscription.CheckoutResponse;
 import com.amandhanda.projects.Crafty.dto.subscription.PortalResponse;
@@ -20,39 +14,37 @@ import com.amandhanda.projects.Crafty.security.AuthUtil;
 import com.amandhanda.projects.Crafty.service.PaymentProcessor;
 import com.amandhanda.projects.Crafty.service.SubscriptionService;
 import com.stripe.exception.StripeException;
-import com.stripe.model.Invoice;
-import com.stripe.model.Price;
-import com.stripe.model.StripeObject;
-import com.stripe.model.Subscription;
-import com.stripe.model.SubscriptionItem;
+import com.stripe.model.*;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
-
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.util.Map;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
-@Slf4j
-@FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class StripePaymentProcessor implements PaymentProcessor {
 
-    final AuthUtil authUtil;
-    final PlanRepository planRepository;
-    final UserRepository userRepository;
-    final SubscriptionService subscriptionService;
+    private final AuthUtil authUtil;
+    private final PlanRepository planRepository;
+    private final UserRepository userRepository;
+    private final SubscriptionService subscriptionService;
 
     @Value("${client.url}")
     private String frontendUrl;
 
     @Override
     public CheckoutResponse createCheckoutSessionUrl(CheckoutRequest request) {
-        Plan plan = planRepository.findById(request.planId())
-                .orElseThrow(() -> new ResourceNotFoundException("Plan", request.planId().toString()));
+        Plan plan = planRepository.findById(request.planId()).orElseThrow(() ->
+                new ResourceNotFoundException("Plan", request.planId().toString()));
+
         Long userId = authUtil.getCurrentUserId();
-        
-         User user = userRepository.findById(userId).orElseThrow(() ->
+        User user = userRepository.findById(userId).orElseThrow(() ->
                 new ResourceNotFoundException("user", userId.toString()));
 
         var params = SessionCreateParams.builder()
@@ -81,7 +73,7 @@ public class StripePaymentProcessor implements PaymentProcessor {
             Session session = Session.create(params.build()); // making api call to the Stripe Backend
             return new CheckoutResponse(session.getUrl());
         } catch (StripeException e) {
-            throw new RuntimeException("Failed to create Stripe checkout session", e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -109,7 +101,7 @@ public class StripePaymentProcessor implements PaymentProcessor {
         }
     }
 
-     @Override
+    @Override
     public void handleWebhookEvent(String type, StripeObject stripeObject, Map<String, String> metadata) {
         log.debug("Handling stripe event: {}", type);
 
@@ -249,5 +241,23 @@ public class StripePaymentProcessor implements PaymentProcessor {
 
         return subDetails.getSubscription();
     }
-
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

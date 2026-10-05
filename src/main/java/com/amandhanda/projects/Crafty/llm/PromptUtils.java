@@ -105,18 +105,5 @@ public class PromptUtils {
             - Always read the file by using the read_files tool before updating the file content, if the file content is not known by you already.
             - If you are going to calling read_files tool then Always generate a tool tag with proper args before calling the read_files tool.
             - Always keep your message short and to the point.
-        """;
-
-   public final static String SIMPLE_USER_PROMPT = """
-            You are an expert software developer. Generate the complete code required for the user's request.
-
-Requirements:
-- Return only the code and necessary file structure.
-- Write clean, production-ready code.
-- Explain briefly only when necessary.
-- Generate the response progressively and stream the code as it is being created.
-- Do not wait until the entire solution is complete before returning output.
-- If multiple files are needed, clearly specify each filename before its code.
-        """;
-
+            """;
 }

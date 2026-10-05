@@ -1,17 +1,17 @@
 package com.amandhanda.projects.Crafty.controller;
 
-
+import com.amandhanda.projects.Crafty.dto.deploy.DeployResponse;
+import com.amandhanda.projects.Crafty.dto.project.ProjectRequest;
+import com.amandhanda.projects.Crafty.dto.project.ProjectResponse;
+import com.amandhanda.projects.Crafty.dto.project.ProjectSummaryResponse;
+import com.amandhanda.projects.Crafty.security.AuthUtil;
+import com.amandhanda.projects.Crafty.service.DeploymentService;
+import com.amandhanda.projects.Crafty.service.ProjectService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import com.amandhanda.projects.Crafty.dto.project.ProjectRequest;
-import com.amandhanda.projects.Crafty.dto.project.ProjectResponse;
-import com.amandhanda.projects.Crafty.dto.project.ProjectSummaryResponse;
-import com.amandhanda.projects.Crafty.service.ProjectService;
-
-import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -21,6 +21,7 @@ import java.util.List;
 public class ProjectController {
 
     private final ProjectService projectService;
+    private final DeploymentService deploymentService;
 
     @GetMapping
     public ResponseEntity<List<ProjectSummaryResponse>> getMyProjects() {
@@ -48,7 +49,13 @@ public class ProjectController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{id}/deploy")
+    public ResponseEntity<DeployResponse> deployProject(@PathVariable Long id) {
+        return ResponseEntity.ok(deploymentService.deploy(id));
+    }
+
 }
+
 
 
 

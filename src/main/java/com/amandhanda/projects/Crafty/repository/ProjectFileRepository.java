@@ -1,13 +1,10 @@
 package com.amandhanda.projects.Crafty.repository;
 
-import java.util.List;
-import java.util.Optional;
-
+import com.amandhanda.projects.Crafty.entity.ProjectFile;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.amandhanda.projects.Crafty.entity.ProjectFile;
-
-
+import java.util.List;
+import java.util.Optional;
 
 public interface ProjectFileRepository extends JpaRepository<ProjectFile, Long> {
     

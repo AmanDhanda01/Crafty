@@ -27,6 +27,7 @@ services:
     volumes:
       - minio-data:/data
     restart: unless-stopped
+
 volumes:
   minio-data:
   pgvector-data:

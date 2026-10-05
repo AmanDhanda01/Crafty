@@ -1,15 +1,13 @@
 package com.amandhanda.projects.Crafty.controller;
 
-
+import com.amandhanda.projects.Crafty.dto.subscription.PlanLimitsResponse;
+import com.amandhanda.projects.Crafty.dto.subscription.UsageTodayResponse;
+import com.amandhanda.projects.Crafty.service.UsageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.amandhanda.projects.Crafty.dto.subscription.PlanLimitsResponse;
-import com.amandhanda.projects.Crafty.dto.subscription.UsageTodayResponse;
-import com.amandhanda.projects.Crafty.service.UsageService;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,11 +18,9 @@ public class UsageController {
 
     @GetMapping("/today")
     public ResponseEntity<UsageTodayResponse> getTodayUsage() {
-        return ResponseEntity.ok(usageService.getTodayUsageOfUser());
+        Long userId = 1L;
+//        return ResponseEntity.ok(usageService.getTodayUsageOfUser(userId));
+        return null;
     }
 
-    @GetMapping("/limits")
-    public ResponseEntity<PlanLimitsResponse> getPlanLimits() {
-        return ResponseEntity.ok(usageService.getCurrentSubscriptionLimitsOfUser());
-    }
 }

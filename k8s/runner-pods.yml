@@ -1,0 +1,122 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: minio-data-community
+  namespace: crafty
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio
+  namespace: crafty
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minio
+  template:
+    metadata:
+      labels:
+        app: minio
+    spec:
+      containers:
+        - name: minio
+          image: quay.io/minio/minio:latest
+          imagePullPolicy: IfNotPresent
+          args: ["server", "/data", "--console-address", ":9001"]
+          env:
+            - name: MINIO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: minio-credentials
+                  key: root-user
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: minio-credentials
+                  key: root-password
+          ports:
+            - name: api
+              containerPort: 9000
+            - name: console
+              containerPort: 9001
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          readinessProbe:
+            httpGet:
+              path: /minio/health/ready
+              port: api
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /minio/health/live
+              port: api
+            initialDelaySeconds: 20
+            periodSeconds: 10
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: minio-data-community
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: runner-pool
+  namespace: crafty
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: runner
+      status: idle #will be changed to running
+  template:
+    metadata:
+      labels:
+        app: runner
+        status: idle
+    spec:
+      volumes:
+        - name: workspace
+          emptyDir: {}
+        - name: pnpm-store
+          hostPath:
+            path: /mnt/pnpm-store
+            type: DirectoryOrCreate
+      containers:
+        - name: runner
+          image: node:20-alpine
+          workingDir: /app
+          command: ["/bin/sh", "-c", "sleep infinity"]
+          volumeMounts:
+            - name: workspace
+              mountPath: /app
+            - name: pnpm-store
+              mountPath: /root/.local/share/pnpm
+          ports:
+            - containerPort: 5173
+          resources:
+            limits:
+              memory: "1Gi" # Prevent one user from crashing the node
+
+        # 2. THE SYNCER (File Sync)
+        - name: syncer
+          image:  quay.io/minio/aistor/minio:latest
+          command: ["/bin/sh", "-c", "sleep infinity"]
+          env:
+            - name: MC_HOST_myminio
+              value: "http://minioadmin:minioadmin123@minio-service:9000"
+          volumeMounts:
+            - name: workspace
+              mountPath: /app

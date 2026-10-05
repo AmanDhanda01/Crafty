@@ -1,8 +1,8 @@
 package com.amandhanda.projects.Crafty.dto.project;
 
-import java.time.Instant;
-
 import com.amandhanda.projects.Crafty.enums.ProjectRole;
+
+import java.time.Instant;
 
 public record ProjectSummaryResponse(
         Long id,

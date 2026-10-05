@@ -1,64 +1,47 @@
 package com.amandhanda.projects.Crafty.entity;
 
-import java.time.Instant;
-
+import com.amandhanda.projects.Crafty.enums.SubscriptionStatus;
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.amandhanda.projects.Crafty.enums.SubscriptionStatus;
-
-import jakarta.annotation.Generated;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.FieldDefaults;
+import java.time.Instant;
 
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class Subscription {
-   
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false, name = "user_id")
     User user;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name = "plan_id", nullable = false)
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false, name = "plan_id")
     Plan plan;
-    
-    @Enumerated(EnumType.STRING)
+
+    @Enumerated(value = EnumType.STRING)
     SubscriptionStatus status;
 
-    String stripeSubscriptionId; // can be gateway subscription id
+    String stripeSubscriptionId; //can be renamed to gatewaySubscriptionId
 
     Instant currentPeriodStart;
     Instant currentPeriodEnd;
     Boolean cancelAtPeriodEnd = false;
-    
+
     @CreationTimestamp
     Instant createdAt;
+
     @UpdateTimestamp
     Instant updatedAt;
-
-
 }

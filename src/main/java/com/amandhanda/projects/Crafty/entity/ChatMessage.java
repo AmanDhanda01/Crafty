@@ -1,12 +1,10 @@
 package com.amandhanda.projects.Crafty.entity;
 
+import com.amandhanda.projects.Crafty.enums.MessageRole;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
-
-import com.amandhanda.projects.Crafty.enums.MessageRole;
-import com.amandhanda.projects.Crafty.entity.ChatSession;
 
 import java.time.Instant;
 import java.util.List;
